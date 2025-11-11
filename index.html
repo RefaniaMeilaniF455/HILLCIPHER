@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login TECHNOVE ID • Hill Cipher</title>
+  <style>
+    :root{--bg:#0f172a;--card:#0b1220;--muted:#94a3b8;--ring:#3b82f6;--txt:#e2e8f0;--accent:#60a5fa}
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh;display:grid;place-items:center;background: radial-gradient(80% 80% at 20% 20%, #1e293b 0%, #0f172a 60%), radial-gradient(60% 60% at 80% 30%, #0ea5e9 0%, #0f172a 55%);color:var(--txt);font-family:ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial}
+    .card{width:100%;max-width:480px;background: linear-gradient(180deg, rgba(96,165,250,0.06), rgba(2,6,23,0.6)), var(--card);border:1px solid rgba(148,163,184,.15);border-radius:16px;box-shadow:0 20px 60px rgba(2,6,23,.6);padding:28px 24px}
+    .brand{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+    .logo{height:40px;width:40px;border-radius:12px;background: linear-gradient(135deg,#3b82f6,#22d3ee);display:grid;place-items:center;color:white;font-weight:800}
+    .brand h1{font-size:1.2rem;margin:0}
+    .subtitle{margin:4px 0 0;color:var(--muted);font-size:.9rem}
+    form{display:grid;gap:14px;margin-top:14px}
+    .field{position:relative}
+    .label{display:block;font-size:.8rem;color:var(--muted);margin:0 0 6px 2px}
+    .input{width:100%;padding:12px 14px 12px 42px;border-radius:12px;border:1px solid rgba(148,163,184,.25);background: rgba(2,6,23,.5);color:var(--txt);outline:none;transition:.2s border,.2s box-shadow,.2s background}
+    .input::placeholder{color:#64748b}
+    .input:focus{border-color:var(--ring);box-shadow:0 0 0 4px rgba(59,130,246,.2);background: rgba(2,6,23,.7)}
+    .icon{position:absolute;left:12px;top:34px;font-size:1rem;color:#94a3b8}
+    .row{display:flex;gap:10px}
+    .btn{flex:1;padding:12px 14px;border:none;border-radius:12px;cursor:pointer;font-weight:600;background:#1e293b;color:#e2e8f0;transition: transform .06s ease, background .2s}
+    .btn.primary{background: linear-gradient(135deg,#3b82f6,#06b6d4)}
+    .btn:hover{transform: translateY(-1px)}
+    textarea{width:100%;min-height:68px;resize:vertical;padding:12px 14px;border-radius:12px;border:1px solid rgba(148,163,184,.25);background: rgba(2,6,23,.5);color:var(--txt)}
+    .meta{display:flex;justify-content:space-between;align-items:center;margin-top:6px;color:#9ca3af;font-size:.8rem}
+    .hint{color:#93c5fd;font-size:.8rem}
+    .key-view{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;font-size:.85rem;background: rgba(2,6,23,.5);border:1px solid rgba(148,163,184,.2);border-radius:10px;padding:8px 10px;color:#cbd5e1}
+  </style>
+</head>
+<body>
+  <main class="card" aria-label="Login TECHNOVE ID">
+    <div class="brand">
+      <div class="logo">TI</div>
+      <div>
+        <h1>Login TECHNOVE ID</h1>
+        <p class="subtitle"><strong>Selamat Datang di TECHNOVA ID</strong></p>
+      </div>
+    </div>
+
+    <form onsubmit="event.preventDefault()">
+      <div class="field">
+        <label class="label" for="username">Username (Plaintext)</label>
+        <span class="icon">👤</span>
+        <input class="input" id="username" placeholder="Masukan Username" autocomplete="off" />
+      </div>
+
+      <div class="field">
+        <label class="label" for="password">Password (Plaintext atau Sumber Kunci)</label>
+        <span class="icon">🔒</span>
+        <input class="input" id="password" placeholder="Masukan Password" type="text" autocomplete="off" />
+      </div>
+
+      <div class="field">
+        <label class="label" for="keyMode">Sumber Kunci</label>
+        <select class="input" id="keyMode" style="padding-left:14px">
+          <option value="fixed">Kunci Tetap 2×2: [[3,3],[2,5]]</option>
+          <option value="fromPassword">Dari Password (4 huruf pertama, pad X)</option>
+        </select>
+      </div>
+
+      <div class="row">
+        <button type="button" class="btn primary" onclick="encryptBoth()">Enkripsi Keduanya</button>
+        <button type="button" class="btn" onclick="decryptBoth()">Dekripsi Keduanya</button>
+      </div>
+
+      <div class="meta">
+        <span>Mode: Hill Cipher 2×2</span>
+        <span id="keyPreview" class="key-view" title="Key yang digunakan">K: [[3, 3],[2, 5]]</span>
+      </div>
+
+      <div class="field">
+        <label class="label" for="cipherUser">Ciphertext Username</label>
+        <textarea id="cipherUser" readonly placeholder="Ciphertext username..."></textarea>
+      </div>
+
+      <div class="field">
+        <label class="label" for="plainUser">Dekripsi Username</label>
+        <textarea id="plainUser" readonly placeholder="Hasil dekripsi username..."></textarea>
+      </div>
+
+      <div class="field">
+        <label class="label" for="cipherPass">Ciphertext Password</label>
+        <textarea id="cipherPass" readonly placeholder="Ciphertext password..."></textarea>
+      </div>
+
+      <div class="field">
+        <label class="label" for="plainPass">Dekripsi Password</label>
+        <textarea id="plainPass" readonly placeholder="Hasil dekripsi password..."></textarea>
+      </div>
+
+      <p class="hint">Tips: pilih "Kunci Tetap" untuk meniru contoh CLI kamu (K = [[3,3],[2,5]]). Pilih "Dari Password" jika ingin password juga menjadi sumber kunci.</p>
+    </form>
+  </main>
+
+  <script>
+    const mod = (n,m)=>((n%m)+m)%m;
+    const clean = s=> (s||'').toUpperCase().replace(/[^A-Z]/g,'');
+    const toNums = s=> clean(s).split('').map(c=>c.charCodeAt(0)-65);
+    const toText = arr=> arr.map(n=> String.fromCharCode(n+65)).join('');
+
+    const det2 = M=> mod(M[0][0]*M[1][1]-M[0][1]*M[1][0],26);
+    const invMod = (a,m)=>{a=mod(a,m);for(let x=1;x<m;x++) if(mod(a*x,m)===1) return x;return null};
+    const inv2 = M=>{const d=det2(M);const invD=invMod(d,26);if(invD===null) return null;return [[mod(invD*M[1][1],26),mod(-invD*M[0][1],26)],[mod(-invD*M[1][0],26),mod(invD*M[0][0],26)]]};
+
+    function passwordToKey(pw){
+      let nums = toNums(pw);
+      if(nums.length===0) return null;
+      while(nums.length<4) nums.push(23); // pad X
+      nums = nums.slice(0,4);
+      let M = [[nums[0],nums[1]],[nums[2],nums[3]]];
+      // Jika tidak invertible, coba modifikasi elemen terakhir hingga invertible
+      let tries=0;
+      while(inv2(M)===null && tries<26){
+        M[1][1]=mod(M[1][1]+1,26); tries++;
+      }
+      if(inv2(M)===null){ // fallback aman
+        M=[[3,3],[2,5]];
+      }
+      return M;
+    }
+
+    function hillRun(text, M, decrypt=false){
+      let nums = toNums(text);
+      if(nums.length%2!==0) nums.push(23); // X
+      if(decrypt){
+        M = inv2(M);
+        if(!M) return 'Kunci tidak bisa dibalik (det(K) tidak punya invers mod 26).';
+      }
+      const out=[];
+      for(let i=0;i<nums.length;i+=2){
+        const p=[nums[i], nums[i+1]];
+        const c1 = mod(M[0][0]*p[0] + M[0][1]*p[1], 26);
+        const c2 = mod(M[1][0]*p[0] + M[1][1]*p[1], 26);
+        out.push(c1,c2);
+      }
+      return toText(out);
+    }
+
+    function showKey(M){
+      const e=document.getElementById('keyPreview');
+      if(!M){ e.textContent='K: (password kosong)'; return; }
+      e.textContent = `K: [[${M[0][0]}, ${M[0][1]}],[${M[1][0]}, ${M[1][1]}]]`;
+    }
+
+    function processEncrypt(){
+      const user = document.getElementById('username').value;
+      const pass = document.getElementById('password').value;
+      const M = passwordToKey(pass);
+      showKey(M);
+      if(!M){ alert('Password wajib diisi.'); return; }
+      const ct = hillRun(user, M, false);
+      document.getElementById('cipherOut').value = ct;
+      const pt = hillRun(ct, M, true);
+      document.getElementById('plainOut').value = pt;
+    }
+
+    function manualDecrypt(){
+      const ct = document.getElementById('cipherIn').value;
+      const pass = document.getElementById('password').value;
+      const M = passwordToKey(pass);
+      showKey(M);
+      if(!M){ alert('Password wajib diisi.'); return; }
+      const pt = hillRun(ct, M, true);
+      document.getElementById('plainOut').value = pt;
+      if(ct) document.getElementById('cipherOut').value = ct;
+    }
+
+    // Preview kunci saat pengguna mengetik password
+    document.addEventListener('input', (e)=>{
+      if(e.target && e.target.id==='password'){
+        showKey(passwordToKey(e.target.value));
+      }
+    });
+    function keyFromPasswordStr(pw){
+      let nums = toNums(pw);
+      if(nums.length===0) return null;
+      while(nums.length<4) nums.push(23);
+      nums = nums.slice(0,4);
+      let M = [[nums[0],nums[1]],[nums[2],nums[3]]];
+      return inv2(M) ? M : null; // strict: jika tidak invertible, biarkan null
+    }
+
+    function currentKey(){
+      const mode = document.getElementById('keyMode').value;
+      if(mode==='fixed') return [[3,3],[2,5]];
+      const pw = document.getElementById('password').value;
+      return keyFromPasswordStr(pw);
+    }
+
+    function updateKeyPreview(){
+      const M = currentKey();
+      const e = document.getElementById('keyPreview');
+      if(!M){ e.textContent = 'K: (kunci tidak valid)'; return; }
+      e.textContent = `K: [[${M[0][0]}, ${M[0][1]}],[${M[1][0]}, ${M[1][1]}]]`;
+    }
+
+    function encryptBoth(){
+      const user = document.getElementById('username').value;
+      const pass = document.getElementById('password').value;
+      const M = currentKey();
+      updateKeyPreview();
+      if(!M){ alert('Kunci tidak valid. Untuk mode "Dari Password", gunakan minimal 1 huruf A–Z dan pastikan matriks invertible.'); return; }
+      const ctUser = hillRun(user, M, false);
+      const ctPass = hillRun(pass, M, false);
+      document.getElementById('cipherUser').value = ctUser;
+      document.getElementById('cipherPass').value = ctPass;
+      document.getElementById('plainUser').value = hillRun(ctUser, M, true);
+      document.getElementById('plainPass').value = hillRun(ctPass, M, true);
+    }
+
+    function decryptBoth(){
+      const M = currentKey();
+      updateKeyPreview();
+      if(!M){ alert('Kunci tidak valid.'); return; }
+      const ctUser = document.getElementById('cipherUser').value;
+      const ctPass = document.getElementById('cipherPass').value;
+      if(ctUser) document.getElementById('plainUser').value = hillRun(ctUser, M, true);
+      if(ctPass) document.getElementById('plainPass').value = hillRun(ctPass, M, true);
+    }
+
+    // update preview on interactions
+    document.addEventListener('input', (e)=>{
+      if(['password','keyMode'].includes(e.target.id)) updateKeyPreview();
+    });
+  </script>
+</body>
+</html>
